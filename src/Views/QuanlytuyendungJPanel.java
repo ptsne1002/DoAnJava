@@ -188,19 +188,42 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
     {
         CaTruc a = new CaTruc();
         int k = -1;
+        
         k = tblCaTruc.getSelectedRow();
+        System.out.println(tblCaTruc.getColumnName(1));
         if(k > -1)
         {
-        a.setMaNV(tblCaTruc.getValueAt(k, 0).toString());
-        a.setTenNV(tblCaTruc.getValueAt(k, 1).toString());
-        a.setTenCV(tblCaTruc.getValueAt(k, 2).toString());
-        a.setNhiemVu(tblCaTruc.getValueAt(k, 3).toString());
-        a.setKhuVuc(tblCaTruc.getValueAt(k, 4).toString());
-        a.setCaTruc(tblCaTruc.getValueAt(k, 5).toString());
+        for(int i = 0 ; i < 6 ; i++)
+        {
+            if(tblCaTruc.getColumnName(i).equals("Mã Nhân Viên"))
+            {
+                a.setMaNV(tblCaTruc.getValueAt(k, i).toString());
+            }
+            if(tblCaTruc.getColumnName(i).equals("Tên Nhân Viên"))
+            {
+                a.setTenNV(tblCaTruc.getValueAt(k, i).toString());
+            }
+            if(tblCaTruc.getColumnName(i).equals("Tên Công Việc"))
+            {
+                a.setTenCV(tblCaTruc.getValueAt(k, i).toString());
+            }
+            if(tblCaTruc.getColumnName(i).equals("Nhiệm Vụ"))
+            {
+                a.setNhiemVu(tblCaTruc.getValueAt(k, i).toString());
+            }
+            if(tblCaTruc.getColumnName(i).equals("Khu Vực"))
+            {
+                a.setKhuVuc(tblCaTruc.getValueAt(k, i).toString());
+            }
+            if(tblCaTruc.getColumnName(i).equals("Khu Vực"))
+            {
+                a.setCaTruc(tblCaTruc.getValueAt(k, i).toString());
+            }
+        }
         int z=0;
             try {
                 String sql ="update catruc set tencv = '"+a.getTenCV()+"',nhiemvu ='"+a.getNhiemVu()+"',khuvuc = '"+a.getKhuVuc()+"',catruc='"+a.getCaTruc()+"' where manv ='"+a.getMaNV()+"'";
-                System.out.println(sql);
+                
                 Statement st = (Statement) con.createStatement();
                 z = st.executeUpdate(sql);
             } catch (SQLException ex) {
