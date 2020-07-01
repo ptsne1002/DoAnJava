@@ -12,7 +12,10 @@ import static Views.main.a;
 import com.mysql.jdbc.Connection;
 import java.sql.ResultSet;
 import com.mysql.jdbc.Statement;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.LayoutManager;
+import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -25,6 +28,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.text.BadLocationException;
 
 /**
  *
@@ -37,6 +42,7 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
     private  ArrayList<CaTruc> dsct = new ArrayList<CaTruc>();
     private Connection con = ConnnectiontoMySql.GetConnection();
     private DefaultTableModel tblModel;
+    private String textForSearch ="";
     public static JDialog dialog = new JDialog(a,"Nhập Thông Tin",true);
     public static nhapthongtincatrucJPanel infoJPanel = new nhapthongtincatrucJPanel();
     /**
@@ -50,7 +56,6 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
         String query= "SELECT nv.manv , nv.ten , ct.tencv,ct.nhiemvu , ct.khuvuc , ct.catruc FROM nhanvien nv, catruc ct where ct.manv = nv.manv";
         try {
             Statement st = (Statement) con.createStatement();
-            
             ResultSet rs = (ResultSet) st.executeQuery(query);
             while(rs.next())
             {
@@ -92,6 +97,34 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
 //         {
 //            
 //         }
+    }
+    
+    private TableCellRenderer getRenderer() {
+        return new TableCellRenderer() {
+            JTextField f = new JTextField();
+
+            @Override
+            public Component getTableCellRendererComponent(JTable arg0, Object arg1, boolean arg2, boolean arg3, int arg4, int arg5) {
+                if(arg1 != null){
+                    f.setText(arg1.toString());
+                    String string = arg1.toString();
+                    string = string.toLowerCase();
+                    textForSearch = textForSearch.toLowerCase();
+                    if(string.indexOf(textForSearch) >= 0){
+                        int indexOf = string.indexOf(textForSearch);
+                        try {
+                            f.getHighlighter().addHighlight(indexOf,indexOf+textForSearch.length(),new javax.swing.text.DefaultHighlighter.DefaultHighlightPainter(Color.ORANGE));
+                        } catch (BadLocationException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    f.setText("");
+                    f.getHighlighter().removeAllHighlights();
+                }
+                return f;
+            }
+        };
     }
     
     public void DeleTeCaTruc()
@@ -215,7 +248,7 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
             {
                 a.setKhuVuc(tblCaTruc.getValueAt(k, i).toString());
             }
-            if(tblCaTruc.getColumnName(i).equals("Khu Vực"))
+            if(tblCaTruc.getColumnName(i).equals("Ca Trực"))
             {
                 a.setCaTruc(tblCaTruc.getValueAt(k, i).toString());
             }
@@ -281,6 +314,17 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
 
         txtTimCaTruc.setMinimumSize(new java.awt.Dimension(150, 30));
         txtTimCaTruc.setPreferredSize(new java.awt.Dimension(150, 30));
+        txtTimCaTruc.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTimCaTrucKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtTimCaTrucKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtTimCaTrucKeyTyped(evt);
+            }
+        });
 
         btnSuaCaTruc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Img/fix1.png"))); // NOI18N
         btnSuaCaTruc.setText("Sửa Ca");
@@ -410,6 +454,65 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
         openaddCaTruc();
 
     }//GEN-LAST:event_btnThemCaTrucActionPerformed
+
+    private void txtTimCaTrucKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTimCaTrucKeyTyped
+        //NoThing todo
+    }//GEN-LAST:event_txtTimCaTrucKeyTyped
+
+    private void txtTimCaTrucKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTimCaTrucKeyReleased
+        ArrayList<CaTruc> d = new ArrayList<>();
+       textForSearch = txtTimCaTruc.getText();
+        try {
+            String sql = "SELECT nv.manv , nv.ten , ct.tencv,ct.nhiemvu , ct.khuvuc , ct.catruc FROM catruc ct , nhanvien nv WHERE (ct.manv LIKE '%"+textForSearch+"%' or nv.ten LIKE '%"+textForSearch+"%' or tencv LIKE '%"+textForSearch+"%' or nhiemvu like '%"+textForSearch+"%' or khuvuc like '%"+textForSearch+"%' or catruc like '%"+textForSearch+"') and ct.manv = nv.manv";
+            Statement st = (Statement) con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while(rs.next())
+            {
+                CaTruc a = new CaTruc();
+               a.setMaNV(rs.getString("manv"));
+               a.setTenNV(rs.getString("ten"));
+               a.setTenCV(rs.getString("tencv"));
+               a.setNhiemVu(rs.getString("nhiemvu"));
+               a.setKhuVuc(rs.getString("khuvuc"));
+               a.setCaTruc(rs.getString("catruc"));
+               d.add(a);
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(QuanlytuyendungJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        int k = tblModel.getRowCount();
+        
+        for(int j = k-1 ; j>= 0 ;j--)
+        {
+            tblModel.removeRow(j);
+        }
+        
+        
+        for(int i = 0 ; i < d.size() ; i++)
+        {
+            String[] Row = new String[6];
+            Row[0] = d.get(i).getMaNV();
+            Row[1] = d.get(i).getTenNV();
+            Row[2] = d.get(i).getTenCV();
+            Row[3] = d.get(i).getNhiemVu();
+            Row[4] = d.get(i).getKhuVuc();
+            Row[5] = d.get(i).getCaTruc();
+            //tblCaTruc.addColumn(Row);
+            tblModel.addRow(Row);
+//           tblCaTruc.isCellEditable(i, 0);
+//           tblCaTruc.isCellEditable(i, 1);
+        }
+        
+        for(int i =0;i<tblCaTruc.getColumnCount();i++){
+                tblCaTruc.getColumnModel().getColumn(i).setCellRenderer(getRenderer());
+            }
+        tblCaTruc.repaint();
+    }//GEN-LAST:event_txtTimCaTrucKeyReleased
+
+    private void txtTimCaTrucKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTimCaTrucKeyPressed
+
+    }//GEN-LAST:event_txtTimCaTrucKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

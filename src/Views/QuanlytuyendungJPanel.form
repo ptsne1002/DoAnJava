@@ -93,6 +93,11 @@
           <Dimension value="[150, 30]"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTimCaTrucKeyPressed"/>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTimCaTrucKeyReleased"/>
+        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtTimCaTrucKeyTyped"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnSuaCaTruc">
       <Properties>
