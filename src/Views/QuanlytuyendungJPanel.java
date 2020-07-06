@@ -16,12 +16,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.LayoutManager;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -30,6 +37,12 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
+import static org.apache.poi.hssf.usermodel.HeaderFooter.file;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 /**
  *
@@ -180,6 +193,52 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
          adddatatoTable();
      }
 
+     // Ghi nội dung vào file Excel
+     public String getCellVal(int x,int y)
+     {
+         return tblModel.getValueAt(x, y).toString();
+     }
+     
+     public void writeExcel(String file)
+     {
+         XSSFWorkbook wb = new XSSFWorkbook() ;
+         XSSFSheet ws;
+        ws = wb.createSheet();
+         TreeMap<String , Object[]> data = new TreeMap<>();
+         data.put("0",new Object[]{tblModel.getColumnName(0),tblModel.getColumnName(1),tblModel.getColumnName(2),tblModel.getColumnName(3),tblModel.getColumnName(4),tblModel.getColumnName(5)});
+         int numRow = tblModel.getRowCount();
+         for(int i = 0 ; i < numRow ; i++)
+         {
+             int z = i +1;
+             String key = String.valueOf(z);
+             data.put(key, new Object[]{getCellVal(i, 0),getCellVal(i, 1),getCellVal(i, 2),getCellVal(i, 3),getCellVal(i, 4),getCellVal(i, 5)});
+         }
+         Set<String> ids = data.keySet();
+         XSSFRow row;
+         int rowId = 0;
+         for(String key : ids)
+         {
+             row = ws.createRow(rowId++);
+             Object[] values = data.get(key);
+             int cellId = 0;
+             for(Object o : values)
+             {
+                 Cell cell = row.createCell(cellId++);
+                 cell.setCellValue(o.toString());
+             }
+         }
+          try{
+                 FileOutputStream fos = new FileOutputStream(new File(file));
+                 wb.write(fos);
+                 fos.close();
+          } catch (FileNotFoundException ex) {
+            Logger.getLogger(QuanlytuyendungJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(QuanlytuyendungJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+     }
+     
+     
     public QuanlytuyendungJPanel(TextPrompt p, JButton btnLamMoi, JButton btnSuaCaTruc, JButton btnThemCaTruc, JButton btnXoaCaTruc, JLabel jLabel1, JLabel jLabel2, JScrollPane jScrollPane1, JTable tblCaTruc, JTextField txtTimCaTruc, LayoutManager layout) {
         super(layout);
         this.p = p;
@@ -306,6 +365,7 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCaTruc = new javax.swing.JTable();
+        btnXuatFile = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(1386, 838));
 
@@ -382,6 +442,16 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(tblCaTruc);
 
+        btnXuatFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Img/add.png"))); // NOI18N
+        btnXuatFile.setText("Xuất File");
+        btnXuatFile.setMaximumSize(new java.awt.Dimension(140, 40));
+        btnXuatFile.setPreferredSize(new java.awt.Dimension(80, 40));
+        btnXuatFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXuatFileActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -396,7 +466,9 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtTimCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 471, Short.MAX_VALUE)
+                        .addComponent(btnXuatFile, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(btnThemCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(btnXoaCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -420,7 +492,8 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
                         .addComponent(btnThemCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnXoaCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnSuaCaTruc, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnLamMoi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btnLamMoi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnXuatFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtTimCaTruc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -452,7 +525,8 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
     private void btnThemCaTrucActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemCaTrucActionPerformed
         // TODO add your handling code here:
         openaddCaTruc();
-
+        tblModel.setRowCount(0);
+        adddatatoTable();
     }//GEN-LAST:event_btnThemCaTrucActionPerformed
 
     private void txtTimCaTrucKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTimCaTrucKeyTyped
@@ -514,12 +588,37 @@ public class QuanlytuyendungJPanel extends javax.swing.JPanel {
 
     }//GEN-LAST:event_txtTimCaTrucKeyPressed
 
+    private void btnXuatFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXuatFileActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fc = new JFileChooser();
+        String file = "";
+        int option = fc.showSaveDialog(QuanlytuyendungJPanel.this);
+         if(option == JFileChooser.APPROVE_OPTION){
+            String filename = fc.getSelectedFile().getName(); 
+            String path = fc.getSelectedFile().getParentFile().getPath();
+           int len = filename.length();
+            String ext = "";
+            if(len > 4){
+                    ext = filename.substring(len-4, len);
+            }
+
+            if(ext.equals(".xls")){
+                    file = path + "\\" + filename; 
+            }else{
+                    file = path + "\\" + filename + ".xls"; 
+            }
+         }
+         
+         writeExcel(file);
+    }//GEN-LAST:event_btnXuatFileActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLamMoi;
     private javax.swing.JButton btnSuaCaTruc;
     private javax.swing.JButton btnThemCaTruc;
     private javax.swing.JButton btnXoaCaTruc;
+    private javax.swing.JButton btnXuatFile;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
